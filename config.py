@@ -40,11 +40,19 @@ def extract_acls(text):
     acl_pattern = re.compile(r'access-list\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)')
     return acl_pattern.findall(text)
 
-# Function to compare two configuration files
+# Function to compare two configuration files with color coding
 def compare_configs(text1, text2):
     differ = Differ()
     diff = list(differ.compare(text1.splitlines(), text2.splitlines()))
-    return diff
+    colored_diff = []
+    for line in diff:
+        if line.startswith('+ '):
+            colored_diff.append(f'<span style="color: green;">{line}</span>')
+        elif line.startswith('- '):
+            colored_diff.append(f'<span style="color: red;">{line}</span>')
+        else:
+            colored_diff.append(line)
+    return colored_diff
 
 # Streamlit app
 st.title('Advanced Network Configuration Pattern Identifier and Visualizer')
@@ -85,7 +93,7 @@ if uploaded_file1:
             text_input2 = stringio2.read()
             data = compare_configs(text_input1, text_input2)
             st.write("Configuration Differences:")
-            st.code('\n'.join(data))
+            st.markdown('<br>'.join(data), unsafe_allow_html=True)
             data = None
 
         if data:
